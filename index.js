@@ -9,6 +9,25 @@ server.use(express.json());
 
 const URL = "/api/users"
 
+server.put(URL + "/:id", (req, res) => {
+	const id = req.params.id;
+	const bod = req.body;
+	const exists = db.findById(id);
+	console.log(exists)
+
+	db.update(id, bod)
+		.then(upd => {
+			(upd > 0)
+				? res.status(200).json(req.body)
+				: res.status(404).json({ message: `ID NOT FOUND updated none` })
+		})
+		.catch(err => {
+			console.log("PUT 'update user' error", err);
+			res.status(500)
+				.json({ msg: "PUT 'update user' error" });
+		})
+});
+
 // GETs
 // #region GETS
 server.get("/", (req, res) => {
@@ -30,7 +49,9 @@ server.get("/api/users/:id", (req, res) => {
 	const id = req.params.id
 	db.findById(id)
 		.then(incoming => {
-			res.status(200).json(incoming);
+			(incoming > 0)
+				? res.status(200).json(incoming)
+				: res.status(404).json({ message: `ID NOT FOUND updated none` })
 		})
 		.catch(err => {
 			console.log(`GET 'user by id ${id}' error`, err);
@@ -41,9 +62,13 @@ server.get("/api/users/:id", (req, res) => {
 
 // #endregion GETS
 
-
 server.post(URL, (req, res) => {
 	const data = req.body;
+	if (!data.name || !data.bio) {
+		res.status(400).json({ message: `Need both 'name' and 'bio'.` })
+		res.end();
+	}
+
 	db.insert(data)
 		.then(data => {
 			res.status(201).json(data)
@@ -72,4 +97,4 @@ server.delete(URL + "/:id", (req, res) => {
 
 server.listen(port, () => {
 	console.log(`Active :${port}`)
-})
+});
