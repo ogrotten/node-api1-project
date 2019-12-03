@@ -9,6 +9,21 @@ server.use(express.json());
 
 const URL = "/api/users"
 
+// passable GET function
+const returnGet = (id, res) => {
+	db.findById(id)
+		.then(incoming => {
+			(incoming)
+				? res.status(200).json(incoming)
+				: res.status(404).json({ message: `ID NOT FOUND updated none` })
+		})
+		.catch(err => {
+			console.log(`GET 'user by id ${id}' error`, err);
+			res.status(500)
+				.json({ msg: `GET 'user by id ${id}' error` });
+		})
+}
+
 server.put(URL + "/:id", (req, res) => {
 	const id = req.params.id;
 	const bod = req.body;
@@ -47,17 +62,17 @@ server.get("/api/users", (req, res) => {
 
 server.get("/api/users/:id", (req, res) => {
 	const id = req.params.id
-	db.findById(id)
-		.then(incoming => {
-			(incoming > 0)
-				? res.status(200).json(incoming)
-				: res.status(404).json({ message: `ID NOT FOUND updated none` })
-		})
-		.catch(err => {
-			console.log(`GET 'user by id ${id}' error`, err);
-			res.status(500)
-				.json({ msg: `GET 'user by id ${id}' error` });
-		})
+	returnGet(id, res);
+	// MOVED TO "returnGet" function defined at the top
+	// db.findById(id)
+	// 	.then(incoming => {
+	// 		res.status(200).json(incoming);
+	// 	})
+	// 	.catch(err => {
+	// 		console.log(`GET 'user by id ${id}' error`, err);
+	// 		res.status(500)
+	// 			.json({ msg: `GET 'user by id ${id}' error` });
+	// 	})
 })
 
 // #endregion GETS
